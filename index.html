@@ -4,96 +4,99 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PSM 정보공유 시스템</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"></script>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a2a3a; min-height: 100vh; }
-header { background: linear-gradient(135deg, #0d3b6e, #1a6faf); color: white; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
-header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
-.header-right { display: flex; align-items: center; gap: 12px; font-size: 13px; }
-.user-info { background: rgba(255,255,255,0.15); padding: 4px 12px; border-radius: 20px; }
-.logout-btn { background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 4px 14px; border-radius: 20px; cursor: pointer; font-size: 13px; }
-.logout-btn:hover { background: rgba(255,255,255,0.3); }
-.login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(135deg, #0d3b6e 0%, #1a6faf 60%, #2196f3 100%); }
-.login-box { background: white; border-radius: 16px; padding: 48px 40px; width: 380px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-.logo { text-align: center; margin-bottom: 28px; }
-.logo .icon { font-size: 48px; }
-.logo h2 { font-size: 22px; font-weight: 700; color: #0d3b6e; margin-top: 8px; }
-.logo p { font-size: 13px; color: #666; margin-top: 4px; }
-.tab-btns { display: flex; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
-.tab-btns button { flex: 1; padding: 10px; border: none; background: #f5f5f5; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; }
-.tab-btns button.active { background: #0d3b6e; color: white; }
-.form-group { margin-bottom: 16px; }
-.form-group label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 6px; }
-.form-group input, .form-group select { width: 100%; padding: 11px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border 0.2s; }
-.form-group input:focus, .form-group select:focus { border-color: #1a6faf; }
-.login-btn { width: 100%; padding: 13px; background: linear-gradient(135deg, #0d3b6e, #1a6faf); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-.login-btn:hover { opacity: 0.9; }
-.login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.error-msg { color: #e53935; font-size: 13px; text-align: center; margin-top: 10px; }
-.success-msg { color: #2e7d32; font-size: 13px; text-align: center; margin-top: 10px; }
-.main-layout { display: flex; min-height: calc(100vh - 60px); }
-.sidebar { width: 240px; background: white; box-shadow: 2px 0 8px rgba(0,0,0,0.06); padding: 20px 0; flex-shrink: 0; }
-.section-title { font-size: 11px; font-weight: 700; color: #999; padding: 0 20px; margin-bottom: 8px; letter-spacing: 1px; }
-.nav-item { display: flex; align-items: center; gap: 8px; padding: 11px 20px; cursor: pointer; font-size: 13px; color: #444; transition: all 0.15s; border-left: 3px solid transparent; }
-.nav-item:hover { background: #f0f7ff; color: #1a6faf; }
-.nav-item.active { background: #e8f4fd; color: #0d3b6e; border-left-color: #0d3b6e; font-weight: 700; }
-.cat-icon { font-size: 16px; width: 20px; text-align: center; }
-.count-badge { margin-left: auto; background: #e8f4fd; color: #1a6faf; border-radius: 10px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
-.content { flex: 1; padding: 28px; overflow-y: auto; }
-.content-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.content-header h2 { font-size: 20px; font-weight: 700; color: #0d3b6e; }
-.content-header .subtitle { font-size: 13px; color: #888; margin-top: 3px; }
-.upload-btn { background: linear-gradient(135deg, #0d3b6e, #1a6faf); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-.upload-btn:hover { opacity: 0.9; }
-.stats-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-.stat-card { background: white; border-radius: 10px; padding: 14px 20px; flex: 1; min-width: 120px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-top: 3px solid #1a6faf; }
-.stat-num { font-size: 24px; font-weight: 700; color: #0d3b6e; }
-.stat-label { font-size: 12px; color: #888; margin-top: 2px; }
-.doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-.doc-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; border: 1px solid #eef2f7; }
-.doc-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
-.doc-icon { font-size: 36px; margin-bottom: 12px; }
-.doc-name { font-size: 15px; font-weight: 700; color: #1a2a3a; margin-bottom: 6px; word-break: break-all; }
-.doc-meta { font-size: 12px; color: #999; margin-bottom: 14px; }
-.doc-actions { display: flex; gap: 8px; }
-.btn-view { flex: 1; padding: 8px; background: #e8f4fd; color: #0d3b6e; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.btn-view:hover { background: #c8e4f8; }
-.btn-dl { flex: 1; padding: 8px; background: #0d3b6e; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.btn-dl:hover { opacity: 0.85; }
-.btn-del { padding: 8px 12px; background: #fff0f0; color: #e53935; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; }
-.btn-del:hover { background: #ffe0e0; }
-.empty-state { text-align: center; padding: 80px 20px; color: #aaa; grid-column: 1/-1; }
-.empty-icon { font-size: 64px; margin-bottom: 16px; }
-.loading-state { text-align: center; padding: 60px 20px; color: #888; grid-column: 1/-1; }
-.spinner { width: 40px; height: 40px; border: 4px solid #e0e0e0; border-top-color: #1a6faf; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
-.modal-overlay.show { display: flex; }
-.modal { background: white; border-radius: 16px; padding: 32px; width: 460px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-.modal h3 { font-size: 18px; font-weight: 700; color: #0d3b6e; margin-bottom: 20px; }
-.file-drop { border: 2px dashed #c8d8e8; border-radius: 10px; padding: 30px; text-align: center; cursor: pointer; transition: all 0.2s; background: #f8fbff; }
-.file-drop:hover, .file-drop.dragover { border-color: #1a6faf; background: #e8f4fd; }
-.drop-icon { font-size: 36px; margin-bottom: 8px; }
-.file-selected { font-size: 13px; color: #0d3b6e; font-weight: 600; margin-top: 8px; }
-.progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-top: 12px; overflow: hidden; display: none; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, #0d3b6e, #1a6faf); border-radius: 4px; transition: width 0.3s; }
-.progress-text { font-size: 12px; color: #888; text-align: center; margin-top: 6px; display: none; }
-.modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
-.btn-cancel { padding: 10px 20px; background: #f5f5f5; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
-.btn-submit { padding: 10px 24px; background: linear-gradient(135deg, #0d3b6e, #1a6faf); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 700; }
-.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-.pdf-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; flex-direction: column; }
-.pdf-modal-overlay.show { display: flex; }
-.pdf-modal-header { background: #0d3b6e; color: white; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-.pdf-modal-header h4 { font-size: 15px; }
-.close-btn { background: rgba(255,255,255,0.2); border: none; color: white; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-.pdf-modal-body { flex: 1; overflow: hidden; background: #525659; }
-.pdf-modal-body iframe { width: 100%; height: 100%; border: none; }
-.toast { position: fixed; bottom: 24px; right: 24px; background: #1a2a3a; color: white; padding: 12px 20px; border-radius: 10px; font-size: 14px; z-index: 999; display: none; }
-.toast.show { display: block; }
-.toast.success { background: #2e7d32; }
-.toast.error { background: #c62828; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;color:#1a2a3a;min-height:100vh}
+header{background:linear-gradient(135deg,#0d3b6e,#1a6faf);color:white;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,0.2);position:sticky;top:0;z-index:100}
+header h1{font-size:18px;font-weight:700;letter-spacing:1px}
+.header-right{display:flex;align-items:center;gap:12px;font-size:13px}
+.user-info{background:rgba(255,255,255,0.15);padding:4px 12px;border-radius:20px}
+.logout-btn{background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);color:white;padding:4px 14px;border-radius:20px;cursor:pointer;font-size:13px}
+.logout-btn:hover{background:rgba(255,255,255,0.3)}
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0d3b6e 0%,#1a6faf 60%,#2196f3 100%)}
+.login-box{background:white;border-radius:16px;padding:48px 40px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.logo{text-align:center;margin-bottom:28px}
+.logo .icon{font-size:48px}
+.logo h2{font-size:22px;font-weight:700;color:#0d3b6e;margin-top:8px}
+.logo p{font-size:13px;color:#666;margin-top:4px}
+.tab-btns{display:flex;border:1px solid #ddd;border-radius:8px;overflow:hidden;margin-bottom:24px}
+.tab-btns button{flex:1;padding:10px;border:none;background:#f5f5f5;cursor:pointer;font-size:14px;font-weight:600;transition:all 0.2s}
+.tab-btns button.active{background:#0d3b6e;color:white}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#555;margin-bottom:6px}
+.form-group input,.form-group select{width:100%;padding:11px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;outline:none;transition:border 0.2s}
+.form-group input:focus,.form-group select:focus{border-color:#1a6faf}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,#0d3b6e,#1a6faf);color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px}
+.login-btn:hover{opacity:0.9}
+.login-btn:disabled{opacity:0.6;cursor:not-allowed}
+.error-msg{color:#e53935;font-size:13px;text-align:center;margin-top:10px}
+.success-msg{color:#2e7d32;font-size:13px;text-align:center;margin-top:10px}
+.main-layout{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:240px;background:white;box-shadow:2px 0 8px rgba(0,0,0,0.06);padding:20px 0;flex-shrink:0}
+.section-title{font-size:11px;font-weight:700;color:#999;padding:0 20px;margin-bottom:8px;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:11px 20px;cursor:pointer;font-size:13px;color:#444;transition:all 0.15s;border-left:3px solid transparent}
+.nav-item:hover{background:#f0f7ff;color:#1a6faf}
+.nav-item.active{background:#e8f4fd;color:#0d3b6e;border-left-color:#0d3b6e;font-weight:700}
+.cat-icon{font-size:16px;width:20px;text-align:center}
+.count-badge{margin-left:auto;background:#e8f4fd;color:#1a6faf;border-radius:10px;padding:1px 8px;font-size:11px;font-weight:700}
+.content{flex:1;padding:28px;overflow-y:auto}
+.content-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.content-header h2{font-size:20px;font-weight:700;color:#0d3b6e}
+.content-header .subtitle{font-size:13px;color:#888;margin-top:3px}
+.upload-btn{background:linear-gradient(135deg,#0d3b6e,#1a6faf);color:white;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.upload-btn:hover{opacity:0.9}
+.stats-bar{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.stat-card{background:white;border-radius:10px;padding:14px 20px;flex:1;min-width:120px;box-shadow:0 2px 6px rgba(0,0,0,0.05);border-top:3px solid #1a6faf}
+.stat-num{font-size:24px;font-weight:700;color:#0d3b6e}
+.stat-label{font-size:12px;color:#888;margin-top:2px}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.doc-card{background:white;border-radius:12px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);transition:transform 0.2s,box-shadow 0.2s;border:1px solid #eef2f7}
+.doc-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+.doc-icon{font-size:36px;margin-bottom:12px}
+.doc-name{font-size:15px;font-weight:700;color:#1a2a3a;margin-bottom:6px;word-break:break-all}
+.doc-meta{font-size:12px;color:#999;margin-bottom:14px}
+.doc-actions{display:flex;gap:8px}
+.btn-view{flex:1;padding:8px;background:#e8f4fd;color:#0d3b6e;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-view:hover{background:#c8e4f8}
+.btn-dl{flex:1;padding:8px;background:#0d3b6e;color:white;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer}
+.btn-dl:hover{opacity:0.85}
+.btn-del{padding:8px 12px;background:#fff0f0;color:#e53935;border:none;border-radius:6px;font-size:13px;cursor:pointer}
+.btn-del:hover{background:#ffe0e0}
+.empty-state{text-align:center;padding:80px 20px;color:#aaa;grid-column:1/-1}
+.empty-icon{font-size:64px;margin-bottom:16px}
+.loading-state{text-align:center;padding:60px 20px;color:#888;grid-column:1/-1}
+.spinner{width:40px;height:40px;border:4px solid #e0e0e0;border-top-color:#1a6faf;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:white;border-radius:16px;padding:32px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.modal h3{font-size:18px;font-weight:700;color:#0d3b6e;margin-bottom:20px}
+.file-drop{border:2px dashed #c8d8e8;border-radius:10px;padding:30px;text-align:center;cursor:pointer;transition:all 0.2s;background:#f8fbff}
+.file-drop:hover,.file-drop.dragover{border-color:#1a6faf;background:#e8f4fd}
+.drop-icon{font-size:36px;margin-bottom:8px}
+.file-selected{font-size:13px;color:#0d3b6e;font-weight:600;margin-top:8px}
+.progress-bar{width:100%;height:8px;background:#eee;border-radius:4px;margin-top:12px;overflow:hidden;display:none}
+.progress-fill{height:100%;background:linear-gradient(90deg,#0d3b6e,#1a6faf);border-radius:4px;transition:width 0.3s}
+.progress-text{font-size:12px;color:#888;text-align:center;margin-top:6px;display:none}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+.btn-cancel{padding:10px 20px;background:#f5f5f5;border:none;border-radius:8px;cursor:pointer;font-size:14px}
+.btn-submit{padding:10px 24px;background:linear-gradient(135deg,#0d3b6e,#1a6faf);color:white;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed}
+.pdf-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;flex-direction:column}
+.pdf-modal-overlay.show{display:flex}
+.pdf-modal-header{background:#0d3b6e;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.pdf-modal-header h4{font-size:15px}
+.close-btn{background:rgba(255,255,255,0.2);border:none;color:white;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px}
+.pdf-modal-body{flex:1;overflow:hidden;background:#525659}
+.pdf-modal-body iframe{width:100%;height:100%;border:none}
+.toast{position:fixed;bottom:24px;right:24px;background:#1a2a3a;color:white;padding:12px 20px;border-radius:10px;font-size:14px;z-index:999;display:none}
+.toast.show{display:block}
+.toast.success{background:#2e7d32}
+.toast.error{background:#c62828}
+table{width:100%;border-collapse:collapse}
+th{padding:14px 20px;text-align:left;font-size:13px;background:#0d3b6e;color:white}
+td{padding:12px 20px;font-size:13px;border-bottom:1px solid #f0f4f8}
+tr:nth-child(even) td{background:#fafbfc}
 </style>
 </head>
 <body>
@@ -143,6 +146,7 @@ header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
       <div class="nav-item" onclick="selectCat(4)" id="nav4"><span class="cat-icon">🔍</span>자체감사<span class="count-badge" id="cnt4">0</span></div>
       <div class="nav-item" onclick="selectCat(5)" id="nav5"><span class="cat-icon">🎓</span>교육자료<span class="count-badge" id="cnt5">0</span></div>
       <div class="nav-item" onclick="selectCat(6)" id="nav6"><span class="cat-icon">⚠️</span>아차사고 사례<span class="count-badge" id="cnt6">0</span></div>
+      <div class="nav-item" onclick="showMembers()" id="navMembers" style="display:none"><span class="cat-icon">👥</span>회원 관리<span class="count-badge" id="cntMembers">0</span></div>
     </div>
     <div class="content">
       <div class="content-header">
@@ -208,13 +212,12 @@ header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
 <div class="toast" id="toast"></div>
 
 <script>
-const SB_URL = 'https://izjwqsvqtspegthrfrup.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6andxc3ZxdHNwZWd0aHJmcnVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODc3MTAsImV4cCI6MjA5NTU2MzcxMH0.HLs1_AcySCBBA6A3X6W9i0tix5p6KmCg-JvKI-7UDVc';
-const BUCKET = 'pdf-files';
-const HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
-
-const LOCAL_USERS = [{ id:'admin', name:'관리자', pw:'admin1234', role:'admin' }];
-const CATS = {
+var SB_URL = 'https://izjwqsvqtspegthrfrup.supabase.co';
+var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6andxc3ZxdHNwZWd0aHJmcnVwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5ODc3MTAsImV4cCI6MjA5NTU2MzcxMH0.HLs1_AcySCBBA6A3X6W9i0tix5p6KmCg-JvKI-7UDVc';
+var BUCKET = 'pdf-files';
+var HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' };
+var LOCAL_USERS = [{ id:'admin', name:'관리자', pw:'admin1234', role:'admin' }];
+var CATS = {
   0:{name:'전체 문서',sub:'등록된 모든 PSM 문서를 확인합니다'},
   1:{name:'PSM 12대 요소 절차서',sub:'PSM 12대 요소에 관한 절차서 문서'},
   2:{name:'도급사 전달사항',sub:'도급업체 대상 전달 및 공지 문서'},
@@ -223,238 +226,298 @@ const CATS = {
   5:{name:'교육자료',sub:'PSM 관련 교육 및 훈련 자료'},
   6:{name:'아차사고 사례',sub:'아차사고 사례 및 재발방지 대책'}
 };
+var curUser = null;
+var curCat = 0;
+var selFile = null;
+var allDocs = [];
 
-let curUser=null, curCat=0, selFile=null, allDocs=[];
-
-function toast(msg, type='success') {
-  const el=document.getElementById('toast');
-  el.textContent=(type==='success'?'✅ ':'❌ ')+msg;
-  el.className='toast show '+type;
+function showToast(msg, type) {
+  type = type || 'success';
+  var el = document.getElementById('toast');
+  el.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
+  el.className = 'toast show ' + type;
   clearTimeout(el._t);
-  el._t=setTimeout(()=>el.classList.remove('show'),3000);
+  el._t = setTimeout(function(){ el.classList.remove('show'); }, 3500);
 }
 
-async function sbGet(table, filter='') {
-  const r=await fetch(`${SB_URL}/rest/v1/${table}?${filter}&order=created_at.desc`,{method:'GET',headers:HEADERS});
-  if(!r.ok){const t=await r.text();throw new Error(`${r.status}: ${t}`);}
-  return r.json();
-}
-async function sbInsert(table, data) {
-  const r=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:{...HEADERS,'Prefer':'return=representation'},body:JSON.stringify(data)});
-  if(!r.ok){const t=await r.text();throw new Error(`${r.status}: ${t}`);}
-  return r.json();
-}
-async function sbDelete(table, id) {
-  const r=await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`,{method:'DELETE',headers:HEADERS});
-  if(!r.ok){const t=await r.text();throw new Error(`${r.status}: ${t}`);}
+function sbGet(table, filter) {
+  filter = filter || '';
+  return fetch(SB_URL + '/rest/v1/' + table + '?' + filter + '&order=created_at.desc', { method:'GET', headers:HEADERS })
+    .then(function(r){ return r.ok ? r.json() : r.text().then(function(t){ throw new Error(r.status + ': ' + t); }); });
 }
 
-function sbFileUrl(path){return `${SB_URL}/storage/v1/object/public/${BUCKET}/${path}`;}
-
-function switchTab(t){
-  document.getElementById('loginForm').style.display=t==='login'?'':'none';
-  document.getElementById('registerForm').style.display=t==='register'?'':'none';
-  document.getElementById('tabLogin').className=t==='login'?'active':'';
-  document.getElementById('tabRegister').className=t==='register'?'active':'';
+function sbInsert(table, data) {
+  var h = Object.assign({}, HEADERS, { 'Prefer':'return=representation' });
+  return fetch(SB_URL + '/rest/v1/' + table, { method:'POST', headers:h, body:JSON.stringify(data) })
+    .then(function(r){ return r.ok ? r.json() : r.text().then(function(t){ throw new Error(r.status + ': ' + t); }); });
 }
 
-async function doLogin(){
-  const id=document.getElementById('loginId').value.trim();
-  const pw=document.getElementById('loginPw').value;
-  const err=document.getElementById('loginErr');
-  const btn=document.getElementById('loginSubmit');
-  err.style.display='none';
-  const localU=LOCAL_USERS.find(u=>u.id===id&&u.pw===pw);
-  if(localU){enterApp(localU);return;}
-  btn.disabled=true;btn.textContent='로그인 중...';
-  try{
-    const rows=await sbGet('profiles',`username=eq.${encodeURIComponent(id)}&password=eq.${encodeURIComponent(pw)}`);
-    if(!rows.length){err.textContent='아이디 또는 비밀번호가 올바르지 않습니다.';err.style.display='block';}
-    else enterApp({id:rows[0].username,name:rows[0].name,role:rows[0].role||'user'});
-  }catch(e){err.textContent='서버 오류: '+e.message;err.style.display='block';}
-  finally{btn.disabled=false;btn.textContent='로그인';}
+function sbDelete(table, id) {
+  return fetch(SB_URL + '/rest/v1/' + table + '?id=eq.' + id, { method:'DELETE', headers:HEADERS })
+    .then(function(r){ if(!r.ok) return r.text().then(function(t){ throw new Error(r.status + ': ' + t); }); });
 }
 
-async function doRegister(){
-  const id=document.getElementById('regId').value.trim();
-  const name=document.getElementById('regName').value.trim();
-  const pw=document.getElementById('regPw').value;
-  const msg=document.getElementById('regMsg');
-  const show=(txt,ok)=>{msg.textContent=txt;msg.className=ok?'success-msg':'error-msg';msg.style.display='block';};
-  if(id.length<4)return show('아이디는 4자 이상이어야 합니다.');
-  if(!name)return show('이름을 입력해주세요.');
-  if(pw.length<6)return show('비밀번호는 6자 이상이어야 합니다.');
-  try{
-    const exist=await sbGet('profiles',`username=eq.${encodeURIComponent(id)}`);
-    if(exist.length)return show('이미 사용 중인 아이디입니다.');
-    await sbInsert('profiles',{username:id,name,password:pw,role:'user'});
-    show(`${name}님, 가입 완료! 로그인해주세요.`,true);
-    setTimeout(()=>switchTab('login'),1500);
-  }catch(e){show('가입 오류: '+e.message);}
+function sbFileUrl(path){ return SB_URL + '/storage/v1/object/public/' + BUCKET + '/' + path; }
+
+function switchTab(t) {
+  document.getElementById('loginForm').style.display = t === 'login' ? '' : 'none';
+  document.getElementById('registerForm').style.display = t === 'register' ? '' : 'none';
+  document.getElementById('tabLogin').className = t === 'login' ? 'active' : '';
+  document.getElementById('tabRegister').className = t === 'register' ? 'active' : '';
 }
 
-function enterApp(u){
-  curUser=u;
-  document.getElementById('loginPage').style.display='none';
-  document.getElementById('mainApp').style.display='';
-  document.getElementById('headerUser').textContent=u.role==='admin'?`👑 ${u.name}`:`👤 ${u.name}`;
-  document.getElementById('uploadBtn').style.display=u.role==='admin'?'':'none';
+function doLogin() {
+  var id = document.getElementById('loginId').value.trim();
+  var pw = document.getElementById('loginPw').value;
+  var err = document.getElementById('loginErr');
+  var btn = document.getElementById('loginSubmit');
+  err.style.display = 'none';
+  var local = LOCAL_USERS.find(function(u){ return u.id === id && u.pw === pw; });
+  if(local){ enterApp(local); return; }
+  btn.disabled = true; btn.textContent = '로그인 중...';
+  sbGet('profiles', 'username=eq.' + encodeURIComponent(id) + '&password=eq.' + encodeURIComponent(pw))
+    .then(function(rows){
+      if(!rows.length){ err.textContent = '아이디 또는 비밀번호가 올바르지 않습니다.'; err.style.display = 'block'; }
+      else enterApp({ id:rows[0].username, name:rows[0].name, role:rows[0].role || 'user' });
+    })
+    .catch(function(e){ err.textContent = '서버 오류: ' + e.message; err.style.display = 'block'; })
+    .finally(function(){ btn.disabled = false; btn.textContent = '로그인'; });
+}
+
+function doRegister() {
+  var id = document.getElementById('regId').value.trim();
+  var name = document.getElementById('regName').value.trim();
+  var pw = document.getElementById('regPw').value;
+  var msg = document.getElementById('regMsg');
+  function show(txt, ok) { msg.textContent = txt; msg.className = ok ? 'success-msg' : 'error-msg'; msg.style.display = 'block'; }
+  if(id.length < 4) return show('아이디는 4자 이상이어야 합니다.');
+  if(!name) return show('이름을 입력해주세요.');
+  if(pw.length < 6) return show('비밀번호는 6자 이상이어야 합니다.');
+  sbGet('profiles', 'username=eq.' + encodeURIComponent(id))
+    .then(function(exist){
+      if(exist.length) { show('이미 사용 중인 아이디입니다.'); return; }
+      return sbInsert('profiles', { username:id, name:name, password:pw, role:'user' })
+        .then(function(){ show(name + '님, 가입 완료! 로그인해주세요.', true); setTimeout(function(){ switchTab('login'); }, 1500); });
+    })
+    .catch(function(e){ show('가입 오류: ' + e.message); });
+}
+
+function enterApp(u) {
+  curUser = u;
+  document.getElementById('loginPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = '';
+  document.getElementById('headerUser').textContent = u.role === 'admin' ? '👑 ' + u.name : '👤 ' + u.name;
+  document.getElementById('uploadBtn').style.display = u.role === 'admin' ? '' : 'none';
+  document.getElementById('navMembers').style.display = u.role === 'admin' ? '' : 'none';
   loadDocs();
 }
 
-function doLogout(){
-  curUser=null;allDocs=[];
-  document.getElementById('mainApp').style.display='none';
-  document.getElementById('loginPage').style.display='flex';
-  document.getElementById('loginId').value='';
-  document.getElementById('loginPw').value='';
+function doLogout() {
+  curUser = null; allDocs = [];
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('loginPage').style.display = 'flex';
+  document.getElementById('loginId').value = '';
+  document.getElementById('loginPw').value = '';
 }
 
-function selectCat(n){
-  curCat=n;
-  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
-  document.getElementById('nav'+n).classList.add('active');
-  document.getElementById('catTitle').textContent=CATS[n].name;
-  document.getElementById('catSub').textContent=CATS[n].sub;
+function selectCat(n) {
+  curCat = n;
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('nav' + n).classList.add('active');
+  document.getElementById('catTitle').textContent = CATS[n].name;
+  document.getElementById('catSub').textContent = CATS[n].sub;
+  document.getElementById('uploadBtn').style.display = curUser && curUser.role === 'admin' ? '' : 'none';
   render();
 }
 
-function updateBadges(){
-  document.getElementById('cnt0').textContent=allDocs.length;
-  for(let i=1;i<=6;i++)document.getElementById('cnt'+i).textContent=allDocs.filter(d=>d.category==i).length;
-  const f=curCat===0?allDocs:allDocs.filter(d=>d.category==curCat);
-  document.getElementById('statTotal').textContent=allDocs.length;
-  document.getElementById('statCur').textContent=f.length;
+function updateBadges() {
+  document.getElementById('cnt0').textContent = allDocs.length;
+  for(var i = 1; i <= 6; i++) document.getElementById('cnt' + i).textContent = allDocs.filter(function(d){ return d.category == i; }).length;
+  var f = curCat === 0 ? allDocs : allDocs.filter(function(d){ return d.category == curCat; });
+  document.getElementById('statTotal').textContent = allDocs.length;
+  document.getElementById('statCur').textContent = f.length;
 }
 
-async function loadDocs(){
-  const grid=document.getElementById('docGrid');
-  grid.innerHTML=`<div class="loading-state"><div class="spinner"></div><p>문서를 불러오는 중...</p></div>`;
-  try{allDocs=await sbGet('documents');render();}
-  catch(e){grid.innerHTML=`<div class="empty-state"><div class="empty-icon">⚠️</div><p>문서 로딩 실패: ${e.message}</p></div>`;}
+function loadDocs() {
+  var grid = document.getElementById('docGrid');
+  grid.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>문서를 불러오는 중...</p></div>';
+  sbGet('documents')
+    .then(function(docs){ allDocs = docs; render(); })
+    .catch(function(e){ grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>문서 로딩 실패: ' + e.message + '</p></div>'; });
 }
 
-function render(){
-  const list=curCat===0?allDocs:allDocs.filter(d=>d.category==curCat);
-  const grid=document.getElementById('docGrid');
+function render() {
+  var list = curCat === 0 ? allDocs : allDocs.filter(function(d){ return d.category == curCat; });
+  var grid = document.getElementById('docGrid');
   updateBadges();
-  if(!list.length){grid.innerHTML=`<div class="empty-state"><div class="empty-icon">📂</div><p>등록된 문서가 없습니다.</p></div>`;return;}
-  const isAdmin=curUser&&curUser.role==='admin';
-  grid.innerHTML=list.map(doc=>{
-    const date=doc.created_at?doc.created_at.slice(0,10).replace(/-/g,'.'):'';
-    return `<div class="doc-card">
-      <div class="doc-icon">📄</div>
-      <div class="doc-name">${esc(doc.title)}</div>
-      <div class="doc-meta">${CATS[doc.category]?.name||''} · ${date} · ${esc(doc.uploader||'')}</div>
-      <div class="doc-actions">
-        <button class="btn-view" onclick="viewPdf('${esc(doc.file_path)}','${esc(doc.title)}')">👁 보기</button>
-        <button class="btn-dl" onclick="dlPdf('${esc(doc.file_path)}','${esc(doc.filename||doc.title)}')">⬇ 다운로드</button>
-        ${isAdmin?`<button class="btn-del" onclick="delDoc('${doc.id}','${esc(doc.file_path)}')">🗑</button>`:''}
-      </div>
-    </div>`;
+  if(!list.length){ grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div><p>등록된 문서가 없습니다.</p></div>'; return; }
+  var isAdmin = curUser && curUser.role === 'admin';
+  grid.innerHTML = list.map(function(doc){
+    var date = doc.created_at ? doc.created_at.slice(0,10).replace(/-/g,'.') : '';
+    return '<div class="doc-card">' +
+      '<div class="doc-icon">📄</div>' +
+      '<div class="doc-name">' + esc(doc.title) + '</div>' +
+      '<div class="doc-meta">' + (CATS[doc.category] ? CATS[doc.category].name : '') + ' · ' + date + ' · ' + esc(doc.uploader || '') + '</div>' +
+      '<div class="doc-actions">' +
+      '<button class="btn-view" onclick="viewPdf(\'' + esc(doc.file_path) + '\',\'' + esc(doc.title) + '\')">👁 보기</button>' +
+      '<button class="btn-dl" onclick="dlPdf(\'' + esc(doc.file_path) + '\',\'' + esc(doc.filename || doc.title) + '\')">⬇ 다운로드</button>' +
+      (isAdmin ? '<button class="btn-del" onclick="delDoc(\'' + doc.id + '\',\'' + esc(doc.file_path) + '\')">🗑</button>' : '') +
+      '</div></div>';
   }).join('');
 }
 
-function openUpload(){
-  selFile=null;
-  document.getElementById('upTitle').value='';
-  document.getElementById('fileSelected').textContent='';
-  document.getElementById('fileInput').value='';
-  document.getElementById('progressBar').style.display='none';
-  document.getElementById('progressFill').style.width='0%';
-  document.getElementById('progressText').style.display='none';
-  document.getElementById('submitBtn').disabled=false;
-  document.getElementById('submitBtn').textContent='업로드';
-  document.getElementById('cancelBtn').disabled=false;
-  if(curCat>0)document.getElementById('upCat').value=curCat;
+function showMembers() {
+  curCat = -1;
+  document.querySelectorAll('.nav-item').forEach(function(el){ el.classList.remove('active'); });
+  document.getElementById('navMembers').classList.add('active');
+  document.getElementById('catTitle').textContent = '👥 회원 관리';
+  document.getElementById('catSub').textContent = '등록된 회원 목록을 확인합니다';
+  document.getElementById('uploadBtn').style.display = 'none';
+  var grid = document.getElementById('docGrid');
+  grid.innerHTML = '<div class="loading-state"><div class="spinner"></div><p>회원 목록 불러오는 중...</p></div>';
+  sbGet('profiles', 'order=created_at.asc')
+    .then(function(members){
+      document.getElementById('cntMembers').textContent = members.length;
+      document.getElementById('statTotal').textContent = members.length;
+      document.getElementById('statCur').textContent = members.length;
+      if(!members.length){ grid.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>등록된 회원이 없습니다.</p></div>'; return; }
+      var rows = members.map(function(m, i){
+        var date = m.created_at ? m.created_at.slice(0,10).replace(/-/g,'.') : '';
+        var badge = m.role === 'admin'
+          ? '<span style="background:#0d3b6e;color:white;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">👑 관리자</span>'
+          : '<span style="background:#e8f4fd;color:#1a6faf;padding:3px 10px;border-radius:10px;font-size:12px;font-weight:600;">👤 일반</span>';
+        return '<tr>' +
+          '<td style="color:#888">' + (i+1) + '</td>' +
+          '<td style="font-weight:600">' + esc(m.username) + '</td>' +
+          '<td>' + esc(m.name) + '</td>' +
+          '<td>' + badge + '</td>' +
+          '<td style="color:#888">' + date + '</td>' +
+          '<td style="text-align:center"><button onclick="deleteMember(\'' + m.id + '\',\'' + esc(m.username) + '\')" style="background:#fff0f0;color:#e53935;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer">🗑 삭제</button></td>' +
+          '</tr>';
+      }).join('');
+      grid.innerHTML = '<div style="grid-column:1/-1;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06)">' +
+        '<table><thead><tr>' +
+        '<th>번호</th><th>아이디</th><th>이름</th><th>권한</th><th>가입일</th><th style="text-align:center">관리</th>' +
+        '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+    })
+    .catch(function(e){ grid.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>로딩 실패: ' + e.message + '</p></div>'; });
+}
+
+function deleteMember(id, username) {
+  if(!confirm('"' + username + '" 회원을 삭제하시겠습니까?')) return;
+  sbDelete('profiles', id)
+    .then(function(){ showToast(username + ' 회원 삭제 완료!'); showMembers(); })
+    .catch(function(e){ showToast('삭제 실패: ' + e.message, 'error'); });
+}
+
+function openUpload() {
+  selFile = null;
+  document.getElementById('upTitle').value = '';
+  document.getElementById('fileSelected').textContent = '';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('progressBar').style.display = 'none';
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressText').style.display = 'none';
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').textContent = '업로드';
+  document.getElementById('cancelBtn').disabled = false;
+  if(curCat > 0) document.getElementById('upCat').value = curCat;
   document.getElementById('uploadModal').classList.add('show');
 }
-function closeUpload(){document.getElementById('uploadModal').classList.remove('show');}
-function onFileChange(e){setFile(e.target.files[0]);}
-function onDragOver(e){e.preventDefault();document.getElementById('fileDrop').classList.add('dragover');}
-function onDragLeave(){document.getElementById('fileDrop').classList.remove('dragover');}
-function onDrop(e){e.preventDefault();document.getElementById('fileDrop').classList.remove('dragover');setFile(e.dataTransfer.files[0]);}
-function setFile(f){
-  if(!f)return;
-  if(f.type!=='application/pdf'){alert('PDF 파일만 업로드 가능합니다.');return;}
-  selFile=f;
-  document.getElementById('fileSelected').textContent='✅ '+f.name+' ('+Math.round(f.size/1024)+'KB)';
+
+function closeUpload(){ document.getElementById('uploadModal').classList.remove('show'); }
+
+function onFileChange(e){ setFile(e.target.files[0]); }
+function onDragOver(e){ e.preventDefault(); document.getElementById('fileDrop').classList.add('dragover'); }
+function onDragLeave(){ document.getElementById('fileDrop').classList.remove('dragover'); }
+function onDrop(e){ e.preventDefault(); document.getElementById('fileDrop').classList.remove('dragover'); setFile(e.dataTransfer.files[0]); }
+
+function setFile(f) {
+  if(!f) return;
+  if(f.type !== 'application/pdf'){ alert('PDF 파일만 업로드 가능합니다.'); return; }
+  selFile = f;
+  document.getElementById('fileSelected').textContent = '✅ ' + f.name + ' (' + Math.round(f.size/1024) + 'KB)';
 }
 
-async function doUpload(){
-  const title=document.getElementById('upTitle').value.trim();
-  const cat=parseInt(document.getElementById('upCat').value);
-  if(!title){alert('문서 제목을 입력해주세요.');return;}
-  if(!selFile){alert('PDF 파일을 선택해주세요.');return;}
-  const pb=document.getElementById('progressBar');
-  const pf=document.getElementById('progressFill');
-  const pt=document.getElementById('progressText');
-  const sb=document.getElementById('submitBtn');
-  const cb=document.getElementById('cancelBtn');
-  sb.disabled=true;sb.textContent='업로드 중...';cb.disabled=true;
-  pb.style.display='block';pt.style.display='block';
-  pf.style.width='20%';pt.textContent='파일 업로드 중...';
-  try{
-    const path=`psm_${cat}_${Date.now()}.pdf`;
-    const upRes=await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${path}`,{
-      method:'POST',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/pdf','x-upsert':'true'},
-      body:selFile
-    });
-    if(!upRes.ok){const t=await upRes.text();throw new Error(`Storage 오류 ${upRes.status}: ${t}`);}
-    pf.style.width='70%';pt.textContent='문서 정보 저장 중...';
-    const dbRes=await fetch(`${SB_URL}/rest/v1/documents`,{
-      method:'POST',
-      headers:{...HEADERS,'Prefer':'return=representation'},
-      body:JSON.stringify({title,category:cat,filename:selFile.name,file_path:path,uploader:curUser.name})
-    });
-    if(!dbRes.ok){const t=await dbRes.text();throw new Error(`DB 오류 ${dbRes.status}: ${t}`);}
-    pf.style.width='100%';pt.textContent='완료!';
-    await loadDocs();
-    setTimeout(()=>{closeUpload();toast('업로드 완료!');},400);
-  }catch(e){
-    toast('업로드 실패: '+e.message,'error');
-    sb.disabled=false;sb.textContent='업로드';cb.disabled=false;
-    pb.style.display='none';pt.style.display='none';
-  }
+function doUpload() {
+  var title = document.getElementById('upTitle').value.trim();
+  var cat = parseInt(document.getElementById('upCat').value);
+  if(!title){ alert('문서 제목을 입력해주세요.'); return; }
+  if(!selFile){ alert('PDF 파일을 선택해주세요.'); return; }
+  var pb = document.getElementById('progressBar');
+  var pf = document.getElementById('progressFill');
+  var pt = document.getElementById('progressText');
+  var sb = document.getElementById('submitBtn');
+  var cb = document.getElementById('cancelBtn');
+  sb.disabled = true; sb.textContent = '업로드 중...'; cb.disabled = true;
+  pb.style.display = 'block'; pt.style.display = 'block';
+  pf.style.width = '20%'; pt.textContent = '파일 업로드 중...';
+  var path = 'psm_' + cat + '_' + Date.now() + '.pdf';
+  fetch(SB_URL + '/storage/v1/object/' + BUCKET + '/' + path, {
+    method: 'POST',
+    headers: { 'apikey':SB_KEY, 'Authorization':'Bearer ' + SB_KEY, 'Content-Type':'application/pdf', 'x-upsert':'true' },
+    body: selFile
+  })
+  .then(function(r){ return r.ok ? r.json() : r.text().then(function(t){ throw new Error('Storage 오류 ' + r.status + ': ' + t); }); })
+  .then(function(){
+    pf.style.width = '70%'; pt.textContent = '문서 정보 저장 중...';
+    return sbInsert('documents', { title:title, category:cat, filename:selFile.name, file_path:path, uploader:curUser.name });
+  })
+  .then(function(){
+    pf.style.width = '100%'; pt.textContent = '완료!';
+    return loadDocs();
+  })
+  .then(function(){
+    setTimeout(function(){ closeUpload(); showToast('업로드 완료!'); }, 400);
+  })
+  .catch(function(e){
+    showToast('업로드 실패: ' + e.message, 'error');
+    sb.disabled = false; sb.textContent = '업로드'; cb.disabled = false;
+    pb.style.display = 'none'; pt.style.display = 'none';
+  });
 }
 
-function viewPdf(path,title){
-  const url=sbFileUrl(path);
-  document.getElementById('pdfTitle').textContent=title;
-  const viewer=`https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
-  document.getElementById('pdfBody').innerHTML=`<iframe src="${viewer}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+function viewPdf(path, title) {
+  var url = sbFileUrl(path);
+  document.getElementById('pdfTitle').textContent = title;
+  var viewer = 'https://docs.google.com/viewer?url=' + encodeURIComponent(url) + '&embedded=true';
+  document.getElementById('pdfBody').innerHTML = '<iframe src="' + viewer + '" style="width:100%;height:100%;border:none;"></iframe>';
   document.getElementById('pdfModal').classList.add('show');
 }
-function closePdf(){document.getElementById('pdfModal').classList.remove('show');document.getElementById('pdfBody').innerHTML='';}
 
-async function dlPdf(path,filename){
-  try{
-    const url=sbFileUrl(path);
-    const r=await fetch(url);
-    if(!r.ok)throw new Error('파일을 가져올 수 없습니다.');
-    const blob=await r.blob();
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=filename||'document.pdf';
-    document.body.appendChild(a);a.click();document.body.removeChild(a);
-    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-    toast('다운로드 시작!');
-  }catch(e){toast('다운로드 실패: '+e.message,'error');}
+function closePdf(){ document.getElementById('pdfModal').classList.remove('show'); document.getElementById('pdfBody').innerHTML = ''; }
+
+function dlPdf(path, filename) {
+  var url = sbFileUrl(path);
+  fetch(url)
+    .then(function(r){ return r.ok ? r.blob() : Promise.reject(new Error('파일을 가져올 수 없습니다.')); })
+    .then(function(blob){
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || 'document.pdf';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(a.href); }, 1000);
+      showToast('다운로드 시작!');
+    })
+    .catch(function(e){ showToast('다운로드 실패: ' + e.message, 'error'); });
 }
 
-async function delDoc(id,path){
-  if(!confirm('이 문서를 삭제하시겠습니까?'))return;
-  try{
-    await sbDelete('documents',id);
-    await fetch(`${SB_URL}/storage/v1/object/${BUCKET}/${path}`,{method:'DELETE',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
-    allDocs=allDocs.filter(d=>d.id!==id);render();toast('삭제 완료!');
-  }catch(e){toast('삭제 실패: '+e.message,'error');}
+function delDoc(id, path) {
+  if(!confirm('이 문서를 삭제하시겠습니까?')) return;
+  sbDelete('documents', id)
+    .then(function(){
+      return fetch(SB_URL + '/storage/v1/object/' + BUCKET + '/' + path, {
+        method:'DELETE', headers:{ 'apikey':SB_KEY, 'Authorization':'Bearer ' + SB_KEY }
+      });
+    })
+    .then(function(){ allDocs = allDocs.filter(function(d){ return d.id !== id; }); render(); showToast('삭제 완료!'); })
+    .catch(function(e){ showToast('삭제 실패: ' + e.message, 'error'); });
 }
 
-function esc(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-document.getElementById('uploadModal').addEventListener('click',e=>{if(e.target===e.currentTarget&&!document.getElementById('submitBtn').disabled)closeUpload();});
-document.getElementById('pdfModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closePdf();});
+function esc(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+document.getElementById('uploadModal').addEventListener('click', function(e){ if(e.target === e.currentTarget && !document.getElementById('submitBtn').disabled) closeUpload(); });
+document.getElementById('pdfModal').addEventListener('click', function(e){ if(e.target === e.currentTarget) closePdf(); });
 </script>
 </body>
 </html>
